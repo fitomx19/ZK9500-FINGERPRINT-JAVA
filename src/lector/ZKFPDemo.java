@@ -6,8 +6,12 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
@@ -23,6 +27,7 @@ import javax.swing.JTextArea;
 import java.sql.*;  
 import java.util.ArrayList;
 import java.net.*;
+import java.nio.charset.StandardCharsets;
 
 
 
@@ -80,23 +85,25 @@ public class ZKFPDemo extends JFrame{
 	
 	public void launchFrame(){
 		this.setLayout (null);
-		btnOpen = new JButton("Open");  
+		btnOpen = new JButton("Abrir");  
 		this.add(btnOpen);  
 		int nRsize = 20;
 		btnOpen.setBounds(30, 10 + nRsize, 100, 30);
 		
-		btnEnroll = new JButton("Enroll");  
+		btnEnroll = new JButton("Registrar");  
 		this.add(btnEnroll);  
 		btnEnroll.setBounds(30, 60 + nRsize, 100, 30);
 		
-		btnVerify = new JButton("Verify");  
+		/*btnVerify = new JButton("Verify");  
 		this.add(btnVerify);  
 		btnVerify.setBounds(30, 110 + nRsize, 100, 30);
-		
-		btnIdentify = new JButton("Identify");  
+		*/
+                
+		btnIdentify = new JButton("Identificar");  
 		this.add(btnIdentify);  
-		btnIdentify.setBounds(30, 160 + nRsize, 100, 30);
-		
+		btnIdentify.setBounds(30, 110 + nRsize, 100, 30);
+                //btnIdentify.setBounds(30, 160 + nRsize, 100, 30);
+		/*
 		btnRegImg = new JButton("Register By Image");  
 		this.add(btnRegImg);  
 		btnRegImg.setBounds(15, 210 + nRsize, 120, 30);
@@ -104,9 +111,9 @@ public class ZKFPDemo extends JFrame{
 		btnIdentImg = new JButton("Verify By Image");  
 		this.add(btnIdentImg);  
 		btnIdentImg.setBounds(15, 260 + nRsize, 120, 30);
+		*/
 		
-		
-		btnClose = new JButton("Close");  
+		btnClose = new JButton("Cerrar");  
 		this.add(btnClose);  
 		btnClose.setBounds(30, 310 + nRsize, 100, 30);
 		
@@ -139,7 +146,7 @@ public class ZKFPDemo extends JFrame{
 		this.setSize(520, 580);
 		this.setLocationRelativeTo(null);
 		this.setVisible(true);
-		this.setTitle("ZKFinger Demo");
+		this.setTitle("Lector Huellas Gimnasio");
 		this.setResizable(false);
 		
 		btnOpen.addActionListener(new ActionListener() {
@@ -154,7 +161,7 @@ public class ZKFPDemo extends JFrame{
 					return;
 				}
 				int ret = FingerprintSensorErrorCode.ZKFP_ERR_OK;
-                                System.out.println("inicio correctamente" + ret);
+                                System.out.println("inicio correctamente " + ret);
 				//Initialize
 				cbRegTemp = 0;
 				bRegister = false;
@@ -220,7 +227,7 @@ public class ZKFPDemo extends JFrame{
                                 
 			    workThread.start();
 	            textArea.setText("Open succ!");
-                    System.out.println("revisar" + ret);
+                  //  System.out.println("revisar" + ret);
                      //get db fingerprints
                      ArrayList<ArrayList<?>> data = new ArrayList<>();
                     ArrayList<byte[]> fprints = new ArrayList<>();
@@ -235,33 +242,40 @@ public class ZKFPDemo extends JFrame{
     		while(rs.next()) {
     			fprints.add(rs.getBytes("huella"));
     			fid.add(rs.getInt("nombre"));
-    			System.out.println("Retrieved patient iFid " + rs.getInt("nombre"));
+    			System.out.println("Obtenemos la huella del cliente  iFid " + rs.getInt("nombre"));
     		}
     		data.add(fprints);
     		data.add(fid);
     	}catch(SQLException f) {
     		System.out.println(f.getMessage());
     	}
-                        System.out.println(fprints); 
-                       //AGREGAR ALV ALA BD
+                     //   System.out.println(fprints); 
+                       //AGREGAR  ALA BD LAS HUELLAS LEIDAS
         	if(fprints.size() == fid.size()) { 
-    		System.out.println("DB size match, " + fid.size());
+    		System.out.println("Tamaño de la base de datos coincide, " + fid.size());
     		int i;
-           System.out.println( fid.get(0));
+          // System.out.println( fid.get(0));
            //Imprimir con una posicion especifica
            ArrayList<byte[]> fprints2 = (ArrayList<byte[]>) data.get(0);
             ArrayList<Integer> fid2 = (ArrayList<Integer>) data.get(1);
             //System.out.println(fprints2);
                 //System.out.println(fid2);
                 
+                
+                  
+                
+                
+                
+                
+                
            
     		for(i = 0; i < fprints2.size(); i++) {
                     
     			if(0 == (ret = FingerprintSensorEx.DBAdd(mhDB, fid2.get(i), fprints2.get(i)))){
                             //ret = FingerprintSensorEx.DBAdd( mhDB, iFid, fpTemplate);
-    				System.out.println("Added patient fingerprint " + (i+1));
+    				System.out.println("Agregamos huellas de cliente " + (i+1));
     			}else {
-    				System.out.println("Failed to add patient fingerprint " + (i+1));
+    				System.out.println("Failed to add client fingerprint " + (i+1));
     			}
     			iFid = fid2.get(i);	
     		}
@@ -272,15 +286,6 @@ public class ZKFPDemo extends JFrame{
     		System.out.println("Next finger id " + iFid);
     	}
     	
-	
-    	
-                    
-                    
-                    
-			
-                    
-                    
-                    
                     
 			}
 		});
@@ -304,26 +309,26 @@ public class ZKFPDemo extends JFrame{
 			public void actionPerformed(ActionEvent e) {
 				if(0 == mhDevice)
 				{
-					textArea.setText("Please Open device first!");
+					textArea.setText("Presiona en Abrir Sensor!");
 					return;
 				}
 				if(!bRegister)
 				{
 					enroll_idx = 0;
 					bRegister = true;
-					textArea.setText("Please your finger 3 times!");
+					textArea.setText("Coloca tu dedo indice derecho 3 veces!");
                                         
 				}
 			}
 			});
-		
+		/*
 		btnVerify.addActionListener(new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				if(0 == mhDevice)
 				{
-					textArea.setText("Please Open device first!");
+					textArea.setText("Presiona en Abrir Sensor!");
 					return;
 				}
 				if(bRegister)
@@ -337,14 +342,14 @@ public class ZKFPDemo extends JFrame{
 				}
 			}
 			});
-		
+		*/
 		btnIdentify.addActionListener(new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				if(0 == mhDevice)
 				{
-					textArea.setText("Please Open device first!");
+					textArea.setText("Presiona en Abrir Sensor!");
 					return;
 				}
 				if(bRegister)
@@ -359,7 +364,7 @@ public class ZKFPDemo extends JFrame{
 			}
 			});
 		
-		
+		/*
 		btnRegImg.addActionListener(new ActionListener() {
 
 			@Override
@@ -459,7 +464,7 @@ public class ZKFPDemo extends JFrame{
 				}
 			}
 		});
-	
+	*/
 		
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		this.addWindowListener(new WindowAdapter(){
@@ -677,14 +682,14 @@ public class ZKFPDemo extends JFrame{
                 int ret = FingerprintSensorEx.DBIdentify(mhDB, template, fid, score);
                 if (ret == 0)
                 {
-                    textArea.setText("the finger already enroll by " + fid[0] + ",cancel enroll");
+                    textArea.setText("Este dedo ya esta registrado por " + fid[0] + ",cancelando registro");
                     bRegister = false;
                     enroll_idx = 0;
                     return;
                 }
                 if (enroll_idx > 0 && FingerprintSensorEx.DBMatch(mhDB, regtemparray[enroll_idx-1], template) <= 0)
                 {
-                	textArea.setText("please press the same finger 3 times for the enrollment");
+                	textArea.setText("Porfavor presiona el dedo tres veces para el registro");
                     return;
                 }
                 System.arraycopy(template, 0, regtemparray[enroll_idx], 0, 2048);
@@ -701,6 +706,7 @@ public class ZKFPDemo extends JFrame{
                         System.arraycopy(regTemp, 0, lastRegTemp, 0, cbRegTemp);
                         
                         System.out.println((regTemp));
+                        //Clase para registrar huella
                         insert(regTemp, iFid);
                         //System.out.println(mhDB);
                         //System.out.println(iFid);
@@ -718,13 +724,13 @@ public class ZKFPDemo extends JFrame{
                      */  
                          
                         //Base64 Template
-                        textArea.setText("enroll succ");
+                        textArea.setText("registro completado");
                     } else {
-                    	textArea.setText("enroll fail, error code=" + ret);
+                    	textArea.setText("registro fallido, error code=" + ret);
                     }
                     bRegister = false;
                 } else {
-                	textArea.setText("You need to press the " + (3 - enroll_idx) + " times fingerprint");
+                	textArea.setText("Necesitas Presionar " + (3 - enroll_idx) + " veces el lector");
                 }
 			}
 			else
@@ -736,16 +742,81 @@ public class ZKFPDemo extends JFrame{
 					int ret = FingerprintSensorEx.DBIdentify(mhDB, template, fid, score);
                     if (ret == 0)
                     {
-                    	textArea.setText("Identify succ, fid=" + fid[0] + ",score=" + score[0]);
+                    	textArea.setText("Identificacion completa, fid del usuario=" + fid[0] + ",puntuacion=" + score[0]);
                         // Create a neat value object to hold the URL
+                              URL url;
+                               System.out.println(score[0]);
+                        if (score[0] >= 60){
+                             try{  
+                                Class.forName("com.mysql.jdbc.Driver");  
+                                Connection con=DriverManager.getConnection(  
+                                "jdbc:mysql://localhost:3306/database_links?characterEncoding=latin1&useConfigs=maxPerformance","root","07630");  
+                                //here sonoo is database name, root is username and password  
+                                Statement stmt=con.createStatement();  
+                                ResultSet rs=stmt.executeQuery("select * from  miembros where idHuella  = "+fid[0]+""); 
+                                if(rs.next()){
+                                    int resultadoid = rs.getInt("id");
+                                    stmt.execute("INSERT INTO asistencia_usuarios (`id`,`idHuella`) VALUES ("+fid[0]+", '"+resultadoid+"')"); 
+                                    System.out.println("Datos enviados del usuario " + resultadoid +" con valor de huella " + fid[0]);
+                                }
+                                
+                               
+                                
+                                }catch(Exception e){ System.out.println(e);}     
+                        }else{
+                            textArea.setText("Identificacion incompleta, fid del usuario=" + fid[0] + ",puntuacion=" + score[0] + "intente nuevamente");
+                          
+                        }
+                        
+                    try {
+                        // Creando un objeto URL
+                        url = new URL("http://localhost:4000/miembros/identificadorhuella/"+fid[0]+"");
 
+                        // Realizando la petición GET
+                        URLConnection con = url.openConnection();
 
+                        // Leyendo el resultado
+                        BufferedReader in = new BufferedReader(new InputStreamReader(
+                                con.getInputStream()));
 
+                        String linea;
+                        while ((linea = in.readLine()) != null) {
+                           // System.out.println(linea);
+                        }
+                    } catch (IOException e) {
+                        System.out.println(e.getMessage());
+                    }
+                    
+                    
+                       try {
+                    Socket s = new Socket("localhost", 6666);
+                  
+                    // Send a message to the server
+                    OutputStreamWriter out = new OutputStreamWriter(s.getOutputStream(), StandardCharsets.UTF_8);
+                    out.write(""+fid[0]);
+                    out.flush();
+                    out.close();
+                    
 
+                    // Receive a message from the server
+                    InputStream input = s.getInputStream();
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(input));
+                    String line = "works";
+                    System.out.println(line);
+                   
+                } catch (IOException f) {
+                    System.out.println(f);
+
+            }
+                    
+                    
+                    
+
+                    
                     }
                     else
                     {
-                    	textArea.setText("Identify fail, errcode=" + ret);
+                    	textArea.setText("Identifiacion fallida , errcode=" + ret);
                     }
                         
 				}
@@ -779,9 +850,9 @@ public class ZKFPDemo extends JFrame{
                                 "jdbc:mysql://localhost:3306/huellas?characterEncoding=latin1&useConfigs=maxPerformance","root","07630");  
                                 //here sonoo is database name, root is username and password  
                                 Statement stmt=con.createStatement();  
-                                ResultSet rs=stmt.executeQuery("select * from prueba");  
-                                while(rs.next())  
-                                System.out.println(rs.getString("nombre"));  
+                                //ResultSet rs=stmt.executeQuery("select * from prueba");  
+                               // while(rs.next())  
+                                //System.out.println(rs.getString("nombre"));  
                                 
                                 }catch(Exception e){ System.out.println(e);}  
  
